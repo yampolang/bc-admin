@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  nginx:
+    container_name: ${COMPOSE_PROJECT_NAME}-nginx
+    build:
+      context: ./.docker
+      dockerfile: nginx.docker
+      args:
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
+    volumes:
+      - ./:/app
+      - ./logs:/var/log/nginx
+    networks:
+      - localhost-net
+      - internal-net
+    ports:
+      - 127.0.0.1:${SERVER_PORT:-82}:80
+    restart: always
+
+  node:
+    container_name: ${COMPOSE_PROJECT_NAME}-node
+    image: node:20-alpine
+    networks:
+      - internal-net
+    volumes:
+      - ./:/app
+    user: ${USER_ID:-1000}:${GROUP_ID:-1000}
+    working_dir: /app
+    command: npm run build
+
+networks:
+  internal-net:
+    name: ${COMPOSE_PROJECT_NAME}-internal-net
+    driver: bridge
+  localhost-net:
+    name: localhost-net
+    external: true

@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  node:
+    container_name: ${COMPOSE_PROJECT_NAME}-node
+    image: node:20-alpine
+    networks:
+      - internal-net
+      - localhost-net
+    volumes:
+      - ./:/app
+    ports:
+      - ${SERVER_PORT}:8080
+    user: ${USER_ID:-1000}:${GROUP_ID:-1000}
+    working_dir: /app
+    command: npm run dev
+
+networks:
+  internal-net:
+    name: ${COMPOSE_PROJECT_NAME}-internal-net
+    driver: bridge
+  localhost-net:
+    name: localhost-net
+    external: true
